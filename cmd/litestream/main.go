@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"embed"
 	"errors"
 	"flag"
 	"fmt"
@@ -214,19 +215,22 @@ func (c *Config) DBConfig(path string) *DBConfig {
 	return nil
 }
 
+//go:embed litestream.yml
+var configFile embed.FS
+
 // ReadConfigFile unmarshals config from filename. Expands path if needed.
 // If expandEnv is true then environment variables are expanded in the config.
 func ReadConfigFile(filename string, expandEnv bool) (_ Config, err error) {
 	config := DefaultConfig()
 
 	// Expand filename, if necessary.
-	filename, err = expand(filename)
-	if err != nil {
-		return config, err
-	}
+	// filename, err = expand(filename)
+	// if err != nil {
+	// 	return config, err
+	// }
 
 	// Read configuration.
-	buf, err := os.ReadFile(filename)
+	buf, err := configFile.ReadFile("litestream.yml")
 	if os.IsNotExist(err) {
 		return config, fmt.Errorf("config file not found: %s", filename)
 	} else if err != nil {
